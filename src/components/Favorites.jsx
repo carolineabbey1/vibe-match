@@ -1,0 +1,31 @@
+import SongCard from "./SongCard"
+
+export default function Favorites({ favoriteIds, songs, onToggleFavorite }) {
+  const favoriteSongs = songs.filter((song) => favoriteIds.includes(song.id))
+
+  if (favoriteSongs.length === 0) {
+    return (
+      <p style={{
+        textAlign: "center",
+        color: "rgba(240,238,255,0.45)",
+        fontFamily: "'DM Sans', sans-serif",
+        fontSize: "0.95rem",
+      }}>
+        No favorites yet. Tap the heart on a song to save it here.
+      </p>
+    )
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+      {favoriteSongs.map((song) => (
+        <SongCard
+          key={song.id}
+          song={song}
+          isFavorite={true}
+          onToggleFavorite={onToggleFavorite}
+        />
+      ))}
+    </div>
+  )
+}
