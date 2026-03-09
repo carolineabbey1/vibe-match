@@ -1,4 +1,9 @@
 import { useState, useEffect } from "react";
+import { songs } from "./data/songs";
+import { loadFavorites, addFavorite, removeFavorite } from "./utils/localStorage";
+import MoodSelector from "./components/MoodSelector";
+import SongCard from "./components/SongCard";
+import Favorites from "./components/Favorites";
 
 const floatingNotes = ["♪", "♫", "♩", "♬", "♭", "♮"];
 
@@ -10,8 +15,28 @@ function FloatingNote({ note, style }) {
   );
 }
 
+function shuffle(arr) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function getSongsForMood(mood) {
+  return shuffle(songs.filter((s) => s.mood === mood));
+}
+
 export default function App() {
   const [notes, setNotes] = useState([]);
+  const [selectedMood, setSelectedMood] = useState(null);
+  const [recommended, setRecommended] = useState([]);
+  const [favoriteIds, setFavoriteIds] = useState([]);
+
+  useEffect(() => {
+    setFavoriteIds(loadFavorites());
+  }, []);
 
   useEffect(() => {
     const generated = Array.from({ length: 12 }, (_, i) => ({
@@ -28,6 +53,25 @@ export default function App() {
     }));
     setNotes(generated);
   }, []);
+
+  function handleSelectMood(mood) {
+    setSelectedMood(mood);
+    setRecommended(getSongsForMood(mood));
+  }
+
+  function handleShuffle() {
+    if (selectedMood) {
+      setRecommended(getSongsForMood(selectedMood));
+    }
+  }
+
+  function handleToggleFavorite(id) {
+    if (favoriteIds.includes(id)) {
+      setFavoriteIds(removeFavorite(favoriteIds, id));
+    } else {
+      setFavoriteIds(addFavorite(favoriteIds, id));
+    }
+  }
 
   return (
     <>
@@ -52,24 +96,21 @@ export default function App() {
           background: var(--bg);
           color: var(--text);
           font-family: 'DM Sans', sans-serif;
-          overflow: hidden;
         }
 
         .scene {
           position: relative;
-          height: 100vh;
+          min-height: 100vh;
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: center;
-          text-align: center;
           padding: 2rem;
-          overflow: hidden;
+          overflow-x: hidden;
         }
 
         /* Aurora blobs */
         .blob {
-          position: absolute;
+          position: fixed;
           border-radius: 50%;
           filter: blur(90px);
           opacity: 0.35;
@@ -104,7 +145,7 @@ export default function App() {
 
         /* Floating music notes */
         .floating-note {
-          position: absolute;
+          position: fixed;
           color: var(--text);
           animation: floatUp linear infinite;
           pointer-events: none;
@@ -117,86 +158,9 @@ export default function App() {
           100% { transform: translateY(-80px); opacity: 0; }
         }
 
-        /* Card */
-        .card {
-          position: relative;
-          z-index: 1;
-          background: var(--surface);
-          border: 1px solid var(--border);
-          border-radius: 24px;
-          padding: 3.5rem 4rem;
-          max-width: 560px;
-          width: 100%;
-          backdrop-filter: blur(20px);
-          box-shadow:
-            0 0 0 1px rgba(255,255,255,0.05) inset,
-            0 32px 80px rgba(0,0,0,0.5);
-          animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) both;
-        }
-
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(28px); }
           to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .eyebrow {
-          font-family: 'DM Sans', sans-serif;
-          font-size: 0.7rem;
-          font-weight: 400;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: var(--muted);
-          margin-bottom: 1.25rem;
-          animation: fadeUp 0.9s 0.15s cubic-bezier(0.16,1,0.3,1) both;
-        }
-
-        .title {
-          font-family: 'Fraunces', serif;
-          font-weight: 300;
-          font-size: clamp(2.8rem, 8vw, 4.2rem);
-          line-height: 1;
-          letter-spacing: -0.02em;
-          margin-bottom: 0.2rem;
-          background: linear-gradient(135deg, #fff 30%, #c4b5fd 70%, #93c5fd);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          animation: fadeUp 0.9s 0.25s cubic-bezier(0.16,1,0.3,1) both;
-        }
-
-        .title em {
-          font-style: italic;
-          font-weight: 300;
-        }
-
-        .divider {
-          width: 40px;
-          height: 1px;
-          background: linear-gradient(90deg, var(--glow-b), var(--glow-c));
-          margin: 1.5rem auto;
-          animation: fadeUp 0.9s 0.35s cubic-bezier(0.16,1,0.3,1) both;
-        }
-
-        .description {
-          font-size: 1rem;
-          line-height: 1.7;
-          color: var(--muted);
-          font-weight: 300;
-          animation: fadeUp 0.9s 0.45s cubic-bezier(0.16,1,0.3,1) both;
-        }
-
-        .badge {
-          display: inline-block;
-          margin-top: 2rem;
-          padding: 0.4rem 1rem;
-          border-radius: 999px;
-          border: 1px solid var(--border);
-          font-size: 0.72rem;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          color: var(--muted);
-          background: rgba(255,255,255,0.03);
-          animation: fadeUp 0.9s 0.55s cubic-bezier(0.16,1,0.3,1) both;
         }
       `}</style>
 
@@ -211,18 +175,124 @@ export default function App() {
           <FloatingNote key={id} note={note} style={style} />
         ))}
 
-        {/* Main card */}
-        <div className="card">
-          <p className="eyebrow">✦ Music for every mood</p>
-          <h1 className="title">
-            Vibe <em>Match</em>
-          </h1>
-          <div className="divider" />
-          <p className="description">
-            Tell us how you're feeling — we'll find the soundtrack that fits.
-            Discover music that moves with your mood, moment by moment.
-          </p>
-          <span className="badge">Coming soon</span>
+        {/* Content */}
+        <div style={{
+          position: "relative",
+          zIndex: 1,
+          width: "100%",
+          maxWidth: 520,
+          display: "flex",
+          flexDirection: "column",
+          gap: "2rem",
+          paddingTop: "2rem",
+        }}>
+          {/* Header */}
+          <div style={{ textAlign: "center", animation: "fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) both" }}>
+            <p style={{
+              fontSize: "0.7rem",
+              fontWeight: 400,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: "var(--muted)",
+              marginBottom: "0.75rem",
+            }}>
+              ✦ Music for every mood
+            </p>
+            <h1 style={{
+              fontFamily: "'Fraunces', serif",
+              fontWeight: 300,
+              fontSize: "clamp(2.4rem, 7vw, 3.4rem)",
+              lineHeight: 1,
+              letterSpacing: "-0.02em",
+              background: "linear-gradient(135deg, #fff 30%, #c4b5fd 70%, #93c5fd)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}>
+              Vibe <em style={{ fontStyle: "italic", fontWeight: 300 }}>Match</em>
+            </h1>
+          </div>
+
+          {/* Mood selector */}
+          <div style={{ animation: "fadeUp 0.9s 0.15s cubic-bezier(0.16,1,0.3,1) both" }}>
+            <p style={{
+              textAlign: "center",
+              fontSize: "0.95rem",
+              color: "var(--muted)",
+              marginBottom: "1rem",
+            }}>
+              How are you feeling?
+            </p>
+            <MoodSelector selected={selectedMood} onSelect={handleSelectMood} />
+          </div>
+
+          {/* Recommendations */}
+          {selectedMood && (
+            <div style={{ animation: "fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) both" }}>
+              <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "0.75rem",
+              }}>
+                <h2 style={{
+                  fontFamily: "'Fraunces', serif",
+                  fontWeight: 300,
+                  fontSize: "1.3rem",
+                  textTransform: "capitalize",
+                }}>
+                  {selectedMood} vibes
+                </h2>
+                <button
+                  onClick={handleShuffle}
+                  style={{
+                    padding: "0.4rem 1rem",
+                    borderRadius: "999px",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    background: "rgba(255,255,255,0.06)",
+                    color: "rgba(240,238,255,0.6)",
+                    fontSize: "0.8rem",
+                    fontFamily: "'DM Sans', sans-serif",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  Shuffle
+                </button>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                {recommended.map((song) => (
+                  <SongCard
+                    key={song.id}
+                    song={song}
+                    isFavorite={favoriteIds.includes(song.id)}
+                    onToggleFavorite={handleToggleFavorite}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Favorites */}
+          <div style={{ animation: "fadeUp 0.9s 0.3s cubic-bezier(0.16,1,0.3,1) both" }}>
+            <h2 style={{
+              fontFamily: "'Fraunces', serif",
+              fontWeight: 300,
+              fontSize: "1.3rem",
+              marginBottom: "0.75rem",
+              textAlign: "center",
+            }}>
+              Your Favorites
+            </h2>
+            <Favorites
+              favoriteIds={favoriteIds}
+              songs={songs}
+              onToggleFavorite={handleToggleFavorite}
+            />
+          </div>
+
+          {/* Bottom spacer */}
+          <div style={{ height: "2rem" }} />
         </div>
       </div>
     </>
