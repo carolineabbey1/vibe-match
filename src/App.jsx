@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { songs } from "./data/songs";
-import { loadFavorites, addFavorite, removeFavorite } from "./utils/localStorage";
+import { loadFavorites, saveFavorites, addFavorite, removeFavorite } from "./utils/localStorage";
 import MoodSelector from "./components/MoodSelector";
 import SongCard from "./components/SongCard";
 import Favorites from "./components/Favorites";
@@ -71,6 +71,11 @@ export default function App() {
     } else {
       setFavoriteIds(addFavorite(favoriteIds, id));
     }
+  }
+
+  function handleClearFavorites() {
+    setFavoriteIds([]);
+    saveFavorites([]);
   }
 
   return (
@@ -161,6 +166,10 @@ export default function App() {
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(28px); }
           to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+          .scene { padding: 1rem; }
         }
       `}</style>
 
@@ -282,12 +291,22 @@ export default function App() {
               marginBottom: "0.75rem",
               textAlign: "center",
             }}>
-              Your Favorites
+              Your Favorites{favoriteIds.length > 0 && (
+                <span style={{
+                  marginLeft: "0.5rem",
+                  fontSize: "0.85rem",
+                  color: "var(--muted)",
+                  fontFamily: "'DM Sans', sans-serif",
+                }}>
+                  ({favoriteIds.length})
+                </span>
+              )}
             </h2>
             <Favorites
               favoriteIds={favoriteIds}
               songs={songs}
               onToggleFavorite={handleToggleFavorite}
+              onClearAll={handleClearFavorites}
             />
           </div>
 

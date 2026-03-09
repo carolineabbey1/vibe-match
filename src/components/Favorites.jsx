@@ -1,6 +1,6 @@
 import SongCard from "./SongCard"
 
-export default function Favorites({ favoriteIds, songs, onToggleFavorite }) {
+export default function Favorites({ favoriteIds, songs, onToggleFavorite, onClearAll }) {
   const favoriteSongs = songs.filter((song) => favoriteIds.includes(song.id))
 
   if (favoriteSongs.length === 0) {
@@ -26,6 +26,23 @@ export default function Favorites({ favoriteIds, songs, onToggleFavorite }) {
           onToggleFavorite={onToggleFavorite}
         />
       ))}
+      <button
+        onClick={onClearAll}
+        style={{
+          marginTop: "0.5rem",
+          padding: "0.4rem 1rem",
+          borderRadius: "999px",
+          border: "1px solid rgba(255,255,255,0.15)",
+          background: "rgba(255,255,255,0.06)",
+          color: "rgba(240,238,255,0.6)",
+          fontSize: "0.8rem",
+          fontFamily: "'DM Sans', sans-serif",
+          cursor: "pointer",
+          alignSelf: "center",
+        }}
+      >
+        Clear all
+      </button>
     </div>
   )
 }
