@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
+import { supabase } from "./lib/supabase";
 import { songs } from "./data/songs";
 import { loadFavorites, saveFavorites, addFavorite, removeFavorite } from "./utils/localStorage";
+import Auth from "./components/Auth";
 import MoodSelector from "./components/MoodSelector";
 import SongCard from "./components/SongCard";
 import Favorites from "./components/Favorites";
@@ -29,10 +31,25 @@ function getSongsForMood(mood) {
 }
 
 export default function App() {
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState([]);
   const [selectedMood, setSelectedMood] = useState(null);
   const [recommended, setRecommended] = useState([]);
   const [favoriteIds, setFavoriteIds] = useState([]);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => setSession(session)
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     setFavoriteIds(loadFavorites());
@@ -222,38 +239,28 @@ export default function App() {
             </h1>
           </div>
 
-          {/* Mood selector */}
-          <div style={{ animation: "fadeUp 0.9s 0.15s cubic-bezier(0.16,1,0.3,1) both" }}>
+          {loading ? (
             <p style={{
               textAlign: "center",
-              fontSize: "0.95rem",
               color: "var(--muted)",
-              marginBottom: "1rem",
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: "0.95rem",
+              animation: "fadeUp 0.9s 0.15s cubic-bezier(0.16,1,0.3,1) both",
             }}>
-              How are you feeling?
+              Loading...
             </p>
-            <MoodSelector selected={selectedMood} onSelect={handleSelectMood} />
-          </div>
-
-          {/* Recommendations */}
-          {selectedMood && (
-            <div style={{ animation: "fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) both" }}>
-              <div style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "0.75rem",
-              }}>
-                <h2 style={{
-                  fontFamily: "'Fraunces', serif",
-                  fontWeight: 300,
-                  fontSize: "1.3rem",
-                  textTransform: "capitalize",
-                }}>
-                  {selectedMood} vibes
-                </h2>
+          ) : !session ? (
+            /* Auth screen */
+            <div style={{ animation: "fadeUp 0.9s 0.15s cubic-bezier(0.16,1,0.3,1) both", display: "flex", justifyContent: "center" }}>
+              <Auth />
+            </div>
+          ) : (
+            /* Main app */
+            <>
+              {/* Logout */}
+              <div style={{ textAlign: "center" }}>
                 <button
-                  onClick={handleShuffle}
+                  onClick={() => supabase.auth.signOut()}
                   style={{
                     padding: "0.4rem 1rem",
                     borderRadius: "999px",
@@ -263,55 +270,104 @@ export default function App() {
                     fontSize: "0.8rem",
                     fontFamily: "'DM Sans', sans-serif",
                     cursor: "pointer",
-                    transition: "all 0.2s ease",
                   }}
                 >
-                  Shuffle
+                  Log out
                 </button>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                {recommended.map((song) => (
-                  <SongCard
-                    key={song.id}
-                    song={song}
-                    isFavorite={favoriteIds.includes(song.id)}
-                    onToggleFavorite={handleToggleFavorite}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
 
-          {/* Favorites */}
-          <div style={{ animation: "fadeUp 0.9s 0.3s cubic-bezier(0.16,1,0.3,1) both" }}>
-            <h2 style={{
-              fontFamily: "'Fraunces', serif",
-              fontWeight: 300,
-              fontSize: "1.3rem",
-              marginBottom: "0.75rem",
-              textAlign: "center",
-            }}>
-              Your Favorites{favoriteIds.length > 0 && (
-                <span style={{
-                  marginLeft: "0.5rem",
-                  fontSize: "0.85rem",
+              {/* Mood selector */}
+              <div style={{ animation: "fadeUp 0.9s 0.15s cubic-bezier(0.16,1,0.3,1) both" }}>
+                <p style={{
+                  textAlign: "center",
+                  fontSize: "0.95rem",
                   color: "var(--muted)",
-                  fontFamily: "'DM Sans', sans-serif",
+                  marginBottom: "1rem",
                 }}>
-                  ({favoriteIds.length})
-                </span>
-              )}
-            </h2>
-            <Favorites
-              favoriteIds={favoriteIds}
-              songs={songs}
-              onToggleFavorite={handleToggleFavorite}
-              onClearAll={handleClearFavorites}
-            />
-          </div>
+                  How are you feeling?
+                </p>
+                <MoodSelector selected={selectedMood} onSelect={handleSelectMood} />
+              </div>
 
-          {/* Bottom spacer */}
-          <div style={{ height: "2rem" }} />
+              {/* Recommendations */}
+              {selectedMood && (
+                <div style={{ animation: "fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) both" }}>
+                  <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "0.75rem",
+                  }}>
+                    <h2 style={{
+                      fontFamily: "'Fraunces', serif",
+                      fontWeight: 300,
+                      fontSize: "1.3rem",
+                      textTransform: "capitalize",
+                    }}>
+                      {selectedMood} vibes
+                    </h2>
+                    <button
+                      onClick={handleShuffle}
+                      style={{
+                        padding: "0.4rem 1rem",
+                        borderRadius: "999px",
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        background: "rgba(255,255,255,0.06)",
+                        color: "rgba(240,238,255,0.6)",
+                        fontSize: "0.8rem",
+                        fontFamily: "'DM Sans', sans-serif",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      Shuffle
+                    </button>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                    {recommended.map((song) => (
+                      <SongCard
+                        key={song.id}
+                        song={song}
+                        isFavorite={favoriteIds.includes(song.id)}
+                        onToggleFavorite={handleToggleFavorite}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Favorites */}
+              <div style={{ animation: "fadeUp 0.9s 0.3s cubic-bezier(0.16,1,0.3,1) both" }}>
+                <h2 style={{
+                  fontFamily: "'Fraunces', serif",
+                  fontWeight: 300,
+                  fontSize: "1.3rem",
+                  marginBottom: "0.75rem",
+                  textAlign: "center",
+                }}>
+                  Your Favorites{favoriteIds.length > 0 && (
+                    <span style={{
+                      marginLeft: "0.5rem",
+                      fontSize: "0.85rem",
+                      color: "var(--muted)",
+                      fontFamily: "'DM Sans', sans-serif",
+                    }}>
+                      ({favoriteIds.length})
+                    </span>
+                  )}
+                </h2>
+                <Favorites
+                  favoriteIds={favoriteIds}
+                  songs={songs}
+                  onToggleFavorite={handleToggleFavorite}
+                  onClearAll={handleClearFavorites}
+                />
+              </div>
+
+              {/* Bottom spacer */}
+              <div style={{ height: "2rem" }} />
+            </>
+          )}
         </div>
       </div>
     </>
