@@ -1,6 +1,6 @@
 import SongCard from "./SongCard"
 
-export default function Favorites({ favoriteIds, songs, onToggleFavorite, onClearAll }) {
+export default function Favorites({ favoriteIds, songs, onToggleFavorite, onClearAll, ratings, onRate }) {
   const favoriteSongs = songs.filter((song) => favoriteIds.includes(song.id))
 
   if (favoriteSongs.length === 0) {
@@ -24,6 +24,8 @@ export default function Favorites({ favoriteIds, songs, onToggleFavorite, onClea
           song={song}
           isFavorite={true}
           onToggleFavorite={onToggleFavorite}
+          rating={ratings[song.id]}
+          onRate={onRate}
         />
       ))}
       <button

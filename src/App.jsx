@@ -3,6 +3,7 @@ import { supabase } from "./lib/supabase";
 import { songs } from "./data/songs";
 import { loadFavorites, addFavorite, removeFavorite, clearFavorites } from "./utils/favorites";
 import { loadProfile, updateProfile } from "./utils/profile";
+import { loadRatings, upsertRating } from "./utils/ratings";
 import Auth from "./components/Auth";
 import Profile from "./components/Profile";
 import MoodSelector from "./components/MoodSelector";
@@ -40,6 +41,7 @@ export default function App() {
   const [selectedMood, setSelectedMood] = useState(null);
   const [recommended, setRecommended] = useState([]);
   const [favoriteIds, setFavoriteIds] = useState([]);
+  const [ratings, setRatings] = useState({});
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -67,6 +69,14 @@ export default function App() {
       loadProfile(session.user.id).then(setProfile);
     } else {
       setProfile(null);
+    }
+  }, [session]);
+
+  useEffect(() => {
+    if (session) {
+      loadRatings(session.user.id).then(setRatings);
+    } else {
+      setRatings({});
     }
   }, [session]);
 
@@ -118,6 +128,12 @@ export default function App() {
     if (!session) return;
     const ok = await clearFavorites(session.user.id);
     if (ok) setFavoriteIds([]);
+  }
+
+  async function handleRate(songId, value) {
+    if (!session) return;
+    const ok = await upsertRating(session.user.id, songId, value);
+    if (ok) setRatings((prev) => ({ ...prev, [songId]: value }));
   }
 
   return (
@@ -358,6 +374,8 @@ export default function App() {
                         song={song}
                         isFavorite={favoriteIds.includes(song.id)}
                         onToggleFavorite={handleToggleFavorite}
+                        rating={ratings[song.id]}
+                        onRate={handleRate}
                       />
                     ))}
                   </div>
@@ -389,6 +407,8 @@ export default function App() {
                   songs={songs}
                   onToggleFavorite={handleToggleFavorite}
                   onClearAll={handleClearFavorites}
+                  ratings={ratings}
+                  onRate={handleRate}
                 />
               </div>
 

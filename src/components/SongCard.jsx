@@ -1,4 +1,6 @@
-export default function SongCard({ song, isFavorite, onToggleFavorite }) {
+import StarRating from "./StarRating"
+
+export default function SongCard({ song, isFavorite, onToggleFavorite, rating, onRate }) {
   return (
     <div style={{
       display: "flex",
@@ -34,6 +36,7 @@ export default function SongCard({ song, isFavorite, onToggleFavorite }) {
         }}>
           {song.artist}
         </p>
+        <StarRating value={rating} onChange={(val) => onRate(song.id, val)} />
       </div>
       <button
         onClick={() => onToggleFavorite(song.id)}
