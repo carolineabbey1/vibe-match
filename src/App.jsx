@@ -119,9 +119,10 @@ export default function App() {
   }
 
   async function handleUpdateProfile(updates) {
-    if (!session) return;
+    if (!session) return false;
     const ok = await updateProfile(session.user.id, updates);
     if (ok) setProfile((prev) => ({ ...prev, ...updates }));
+    return ok;
   }
 
   async function handleClearFavorites() {

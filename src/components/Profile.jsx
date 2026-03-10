@@ -19,9 +19,9 @@ export default function Profile({ profile, onUpdate }) {
     setEditing(false)
   }
 
-  function handleSave() {
-    onUpdate({ display_name: draftName.trim() || profile.display_name, avatar_color: draftColor })
-    setEditing(false)
+  async function handleSave() {
+    const ok = await onUpdate({ display_name: draftName.trim() || profile.display_name, avatar_color: draftColor })
+    if (ok) setEditing(false)
   }
 
   if (editing) {

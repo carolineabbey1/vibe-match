@@ -29,7 +29,7 @@ export default function Favorites({ favoriteIds, songs, onToggleFavorite, onClea
         />
       ))}
       <button
-        onClick={onClearAll}
+        onClick={() => { if (window.confirm("Remove all favorites?")) onClearAll() }}
         style={{
           marginTop: "0.5rem",
           padding: "0.4rem 1rem",

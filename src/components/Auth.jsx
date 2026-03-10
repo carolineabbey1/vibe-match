@@ -14,16 +14,20 @@ export default function Auth() {
     setError(null)
     setLoading(true)
 
-    if (isLogin) {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) setError(error.message)
-    } else {
-      const { data, error } = await supabase.auth.signUp({ email, password })
-      if (error) {
-        setError(error.message)
-      } else if (!data.session) {
-        setCheckEmail(true)
+    try {
+      if (isLogin) {
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        if (error) setError(error.message)
+      } else {
+        const { data, error } = await supabase.auth.signUp({ email, password })
+        if (error) {
+          setError(error.message)
+        } else if (!data.session) {
+          setCheckEmail(true)
+        }
       }
+    } catch {
+      setError("Something went wrong. Please try again.")
     }
     setLoading(false)
   }
