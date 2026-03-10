@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "./lib/supabase";
 import { songs } from "./data/songs";
-import { loadFavorites, saveFavorites, addFavorite, removeFavorite } from "./utils/localStorage";
+import { loadFavorites, addFavorite, removeFavorite, clearFavorites } from "./utils/favorites";
 import Auth from "./components/Auth";
 import MoodSelector from "./components/MoodSelector";
 import SongCard from "./components/SongCard";
@@ -52,8 +52,12 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    setFavoriteIds(loadFavorites());
-  }, []);
+    if (session) {
+      loadFavorites(session.user.id).then(setFavoriteIds);
+    } else {
+      setFavoriteIds([]);
+    }
+  }, [session]);
 
   useEffect(() => {
     const generated = Array.from({ length: 12 }, (_, i) => ({
@@ -82,17 +86,21 @@ export default function App() {
     }
   }
 
-  function handleToggleFavorite(id) {
+  async function handleToggleFavorite(id) {
+    if (!session) return;
     if (favoriteIds.includes(id)) {
-      setFavoriteIds(removeFavorite(favoriteIds, id));
+      const ok = await removeFavorite(session.user.id, id);
+      if (ok) setFavoriteIds((prev) => prev.filter((fid) => fid !== id));
     } else {
-      setFavoriteIds(addFavorite(favoriteIds, id));
+      const ok = await addFavorite(session.user.id, id);
+      if (ok) setFavoriteIds((prev) => [...prev, id]);
     }
   }
 
-  function handleClearFavorites() {
-    setFavoriteIds([]);
-    saveFavorites([]);
+  async function handleClearFavorites() {
+    if (!session) return;
+    const ok = await clearFavorites(session.user.id);
+    if (ok) setFavoriteIds([]);
   }
 
   return (
