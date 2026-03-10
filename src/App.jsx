@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { supabase } from "./lib/supabase";
 import { songs } from "./data/songs";
 import { loadFavorites, addFavorite, removeFavorite, clearFavorites } from "./utils/favorites";
+import { loadProfile, updateProfile } from "./utils/profile";
 import Auth from "./components/Auth";
+import Profile from "./components/Profile";
 import MoodSelector from "./components/MoodSelector";
 import SongCard from "./components/SongCard";
 import Favorites from "./components/Favorites";
@@ -33,6 +35,7 @@ function getSongsForMood(mood) {
 export default function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState(null);
   const [notes, setNotes] = useState([]);
   const [selectedMood, setSelectedMood] = useState(null);
   const [recommended, setRecommended] = useState([]);
@@ -56,6 +59,14 @@ export default function App() {
       loadFavorites(session.user.id).then(setFavoriteIds);
     } else {
       setFavoriteIds([]);
+    }
+  }, [session]);
+
+  useEffect(() => {
+    if (session) {
+      loadProfile(session.user.id).then(setProfile);
+    } else {
+      setProfile(null);
     }
   }, [session]);
 
@@ -95,6 +106,12 @@ export default function App() {
       const ok = await addFavorite(session.user.id, id);
       if (ok) setFavoriteIds((prev) => [...prev, id]);
     }
+  }
+
+  async function handleUpdateProfile(updates) {
+    if (!session) return;
+    const ok = await updateProfile(session.user.id, updates);
+    if (ok) setProfile((prev) => ({ ...prev, ...updates }));
   }
 
   async function handleClearFavorites() {
@@ -283,6 +300,9 @@ export default function App() {
                   Log out
                 </button>
               </div>
+
+              {/* Profile */}
+              {profile && <Profile profile={profile} onUpdate={handleUpdateProfile} />}
 
               {/* Mood selector */}
               <div style={{ animation: "fadeUp 0.9s 0.15s cubic-bezier(0.16,1,0.3,1) both" }}>
