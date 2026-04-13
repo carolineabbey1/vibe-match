@@ -42,6 +42,9 @@ export default function App() {
   const [recommended, setRecommended] = useState([]);
   const [favoriteIds, setFavoriteIds] = useState([]);
   const [ratings, setRatings] = useState({});
+  const [vibeDescription, setVibeDescription] = useState("");
+  const [vibeLoading, setVibeLoading] = useState(false);
+  const [vibeError, setVibeError] = useState("");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -96,6 +99,25 @@ export default function App() {
     setNotes(generated);
   }, []);
 
+  useEffect(() => {
+    if (!selectedMood) {
+      setVibeDescription("");
+      setVibeError("");
+      return;
+    }
+
+    const cacheKey = getVibeCacheKey(selectedMood);
+    const cached = localStorage.getItem(cacheKey);
+
+    setVibeError("");
+
+    if (cached) {
+      setVibeDescription(cached);
+    } else {
+      setVibeDescription("");
+    }
+  }, [selectedMood]);
+
   function handleSelectMood(mood) {
     setSelectedMood(mood);
     setRecommended(getSongsForMood(mood));
@@ -104,6 +126,54 @@ export default function App() {
   function handleShuffle() {
     if (selectedMood) {
       setRecommended(getSongsForMood(selectedMood));
+    }
+  }
+
+  function getVibeCacheKey(mood) {
+    return `vibe-description-${mood.toLowerCase()}`;
+  }
+
+  async function handleGenerateVibe() {
+    if (!selectedMood) return;
+
+    const cacheKey = getVibeCacheKey(selectedMood);
+    const cached = localStorage.getItem(cacheKey);
+
+    if (cached) {
+      setVibeDescription(cached);
+      setVibeError("");
+      return;
+    }
+
+    try {
+      setVibeLoading(true);
+      setVibeError("");
+      setVibeDescription("");
+
+      const response = await fetch("http://localhost:3001/api/generate-vibe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          mood: selectedMood,
+          songs: recommended.map((song) => song.title),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate vibe description.");
+      }
+
+      setVibeDescription(data.text);
+      localStorage.setItem(cacheKey, data.text);
+    } catch (error) {
+      console.error("Generate vibe failed:", error);
+      setVibeError("Could not generate a vibe description. Please try again.");
+    } finally {
+      setVibeLoading(false);
     }
   }
 
@@ -367,6 +437,61 @@ export default function App() {
                     >
                       Shuffle
                     </button>
+                  </div>
+                  <div
+                    style={{
+                      marginBottom: "1rem",
+                      padding: "1rem",
+                      borderRadius: "18px",
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      backdropFilter: "blur(12px)",
+                    }}
+                  >
+                    <div style={{ marginBottom: vibeDescription || vibeError ? "0.85rem" : 0 }}>
+                      <button
+                        onClick={handleGenerateVibe}
+                        disabled={vibeLoading}
+                        style={{
+                          padding: "0.55rem 1rem",
+                          borderRadius: "999px",
+                          border: "1px solid rgba(255,255,255,0.15)",
+                          background: "rgba(255,255,255,0.08)",
+                          color: "var(--text)",
+                          fontSize: "0.85rem",
+                          fontFamily: "'DM Sans', sans-serif",
+                          cursor: vibeLoading ? "default" : "pointer",
+                          opacity: vibeLoading ? 0.7 : 1,
+                        }}
+                      >
+                        {vibeLoading ? "Generating..." : "Generate Vibe Description"}
+                      </button>
+                    </div>
+
+                    {vibeError && (
+                      <p style={{ fontSize: "0.9rem", color: "#fca5a5" }}>
+                        {vibeError}
+                      </p>
+                    )}
+
+                    {vibeDescription && (
+                      <div>
+                        <p
+                          style={{
+                            fontSize: "0.72rem",
+                            letterSpacing: "0.14em",
+                            textTransform: "uppercase",
+                            color: "var(--muted)",
+                            marginBottom: "0.45rem",
+                          }}
+                        >
+                          AI Vibe Description
+                        </p>
+                        <p style={{ fontSize: "0.95rem", lineHeight: 1.6 }}>
+                          {vibeDescription}
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                     {recommended.map((song) => (

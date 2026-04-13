@@ -1,5 +1,39 @@
 # Vibe Match
 
+## *Addition of Week 12 Information. Midterm Only Info is below this section:*
+
+Vibe Match is a mood-based music recommendation app that suggests songs based on how the user is feeling. Users can select a mood, view recommended songs, favorite tracks, and rate them.
+
+## AI-Powered Feature
+This project includes an AI-powered “Vibe Description” feature using a locally running language model with Ollama. When a user selects a mood, they can generate a short playlist description based on the mood and recommended songs.
+
+To improve performance and reduce unnecessary model calls, the generated descriptions are cached using localStorage. If a user selects the same mood again, the cached description is displayed instantly.
+
+## Technologies Used
+
+- React (Vite)
+- Supabase (authentication and database)
+- Ollama (local LLM runtime)
+- Llama 3.2 3B model
+- Express (backend route for AI calls)
+- localStorage (caching)
+
+## How to Run Locally
+
+1. Clone the repository
+2. Install dependencies:
+- npm install
+3. Install Ollama and pull the model:
+- ollama pull llama3.2:3b
+4. Start the React app:
+- npm run dev
+5. Start the backend server:
+- node server.cjs
+6. Open the app in your browser and generate a vibe description
+
+
+# Midterm Only README:
+
 ## Project Description
 Vibe Match is a React web application that recommends songs based on the user’s current mood. Users can select a mood, browse recommended songs, save favorites, rate songs with a 1–5 star system, and personalize their profile. The application uses Supabase for authentication and cloud database storage so each user’s data (favorites, ratings, and profile information) is stored securely and persists across sessions. The goal of this project was to build a complete full-stack application while working collaboratively with an AI assistant to plan architecture, debug issues, and incrementally implement features.
 
