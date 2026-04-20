@@ -1,5 +1,13 @@
 import { moods } from "../data/songs"
 
+const moodEmojis = {
+  happy: "😊",
+  sad: "😢",
+  chill: "😌",
+  energetic: "⚡",
+  romantic: "💕",
+}
+
 export default function MoodSelector({ selected, onSelect }) {
   return (
     <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", justifyContent: "center" }}>
@@ -20,7 +28,7 @@ export default function MoodSelector({ selected, onSelect }) {
             textTransform: "capitalize",
           }}
         >
-          {mood}
+          {moodEmojis[mood]} {mood}
         </button>
       ))}
     </div>

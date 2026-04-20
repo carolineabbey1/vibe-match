@@ -1,115 +1,110 @@
 # Vibe Match
 
-## *Addition of Week 12 Information. Midterm Only Info is below this section:*
+A mood-based music recommendation web app built with React and Supabase.
 
-Vibe Match is a mood-based music recommendation app that suggests songs based on how the user is feeling. Users can select a mood, view recommended songs, favorite tracks, and rate them.
+**Live Demo:** [your-vercel-url-here]
+**GitHub:** [https://github.com/your-username/vibe-match](https://github.com/your-username/vibe-match)
 
-## AI-Powered Feature
-This project includes an AI-powered “Vibe Description” feature using a locally running language model with Ollama. When a user selects a mood, they can generate a short playlist description based on the mood and recommended songs.
+---
 
-To improve performance and reduce unnecessary model calls, the generated descriptions are cached using localStorage. If a user selects the same mood again, the cached description is displayed instantly.
+## What It Does
 
-## Technologies Used
+Vibe Match lets you pick how you're feeling and instantly get a curated playlist of song recommendations for that mood. You can favorite songs, rate them with stars, and generate an AI-written vibe description for your current playlist — all tied to your personal account so your data persists across sessions.
 
-- React (Vite)
-- Supabase (authentication and database)
-- Ollama (local LLM runtime)
-- Llama 3.2 3B model
-- Express (backend route for AI calls)
-- localStorage (caching)
+## Features
 
-## How to Run Locally
+- **Mood-based recommendations** — choose from Happy, Sad, Chill, Energetic, or Romantic and get a shuffled playlist
+- **Favorites** — heart any song to save it to your personal favorites list
+- **Star ratings** — rate songs 1–5 stars; ratings are saved per user
+- **AI Vibe Description** — generate a short AI-written description of your current playlist's vibe (requires local setup, see below)
+- **User profiles** — set a display name and avatar color
+- **Authentication** — email/password login and signup via Supabase Auth
 
-1. Clone the repository
-2. Install dependencies:
-- npm install
-3. Install Ollama and pull the model:
-- ollama pull llama3.2:3b
-4. Start the React app:
-- npm run dev
-5. Start the backend server:
-- node server.cjs
-6. Open the app in your browser and generate a vibe description
+## Tech Stack
 
+| Layer | Technology |
+|---|---|
+| Frontend | React 19, Vite, JavaScript, CSS |
+| Auth & Database | Supabase (Auth + PostgreSQL) |
+| AI Feature | Ollama (local LLM), Llama 3.2 3B, Express |
+| Deployment | Vercel |
 
-# Midterm Only README:
+## Database Schema
 
-## Project Description
-Vibe Match is a React web application that recommends songs based on the user’s current mood. Users can select a mood, browse recommended songs, save favorites, rate songs with a 1–5 star system, and personalize their profile. The application uses Supabase for authentication and cloud database storage so each user’s data (favorites, ratings, and profile information) is stored securely and persists across sessions. The goal of this project was to build a complete full-stack application while working collaboratively with an AI assistant to plan architecture, debug issues, and incrementally implement features.
+**profiles**
 
-## Technology Used
-### Frontend
-- React (Vite)
-- JavaScript
-- CSS
-- React Hooks (useState, useEffect)
-### Backend and Cloud Services
-- Supabase Auth (email/ password authentication)
-- Supabase PostgreSQL database
-- Row Level Security (RLS) policies
-### Deployment
-- Vercel
-
-## Setup Instructions
-1. Clone the repository
-2. Install dependencies
-3. Create environment variables (create file called .env.local in the project and add the supabase URL and anon key)
-4. Start the development server
-5. The application will run at the local URL provided
-
-## Architecture Overview
-### Frontend
-The frontend is a React application built with Vite. The main application state is managed in App.jsx, which coordinates authentication state, user profile data, favorites, and ratings.
-
-Key components:
-- App.jsx – Main application state and authentication gating
-- Auth.jsx – Login and signup form
-- MoodSelector.jsx – Allows users to select a mood
-- SongCard.jsx – Displays song information and interactions
-- Favorites.jsx – Displays saved songs
-- Profile.jsx – Allows editing display name and avatar color
-- StarRating.jsx – Handles the 1–5 star rating UI
-
-Helper utilities handle communication with Supabase:
-- utils/favorites.js
-- utils/ratings.js
-- utils/profile.js
-
-### Backend
-The backend is powered by Supabase, which provides both authentication and a PostgreSQL database. Authentication is handled with Supabase Auth using email and password login. Session persistence is automatically managed by the Supabase client, allowing users to remain logged in after refreshing the page. Database queries are performed through the Supabase JavaScript client and wrapped in small helper functions to keep UI components simple.
-
-## Database Structure
-The app uses 3 main tables.
-### profiles - stores user profile info
 | Column | Type | Description |
-|------|------|-------------|
+|---|---|---|
 | id | uuid | references auth.users |
-| display_name | text | user display name |
-| avatar_color | text | selected avatar color |
-| created_at | timestamp | profile creation time |
+| display_name | text | user's chosen display name |
+| avatar_color | text | hex color for avatar |
+| created_at | timestamp | |
 
-### favorites - stores songs that a user favorited
+**favorites**
+
 | Column | Type | Description |
-|------|------|-------------|
+|---|---|---|
 | id | uuid | primary key |
 | user_id | uuid | references profiles.id |
-| song_id | integer | ID from song dataset |
-| created_at | timestamp | when favorite was added |
+| song_id | integer | ID from the song dataset |
+| created_at | timestamp | |
 
-### ratings - stores user song ratings
+**ratings**
+
 | Column | Type | Description |
-|------|------|-------------|
+|---|---|---|
 | id | uuid | primary key |
 | user_id | uuid | references profiles.id |
-| song_id | integer | ID from songs dataset |
-| rating | smallint | value from 1-5 |
-| created_at | timestamp | when rating was saved |
+| song_id | integer | ID from the song dataset |
+| rating | smallint | 1–5 |
+| created_at | timestamp | |
 
-## Known Bugs or Limitations
-- The song list is static and stored locally rather than pulled from an external API.
-- Ratings do not currently support clearing a rating once it is set (only changing the value).
-- Profile avatars are color based instead of image uploads to keep the implementation simple.
-- The application does not currently calculate average ratings across users.
+## Running Locally
 
-## What I Learned
-This project helped me learn how to use AI as a development partner rather than simply generating code all at once. I used Claude to plan the architecture of the application, break features into manageable steps, and debug issues such as authentication behavior and session loading. Working incrementally with AI made it easier to understand each part of the system and avoid large, hard to fix code changes. I also gained experience integrating a React frontend with Supabase authentication and database services.
+### 1. Clone and install
+
+```bash
+git clone https://github.com/your-username/vibe-match.git
+cd vibe-match
+npm install
+```
+
+### 2. Set up environment variables
+
+Create a `.env.local` file in the project root:
+
+```
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### 3. Start the app
+
+```bash
+npm run dev
+```
+
+The app runs at `http://localhost:5173`.
+
+### 4. AI Vibe Description (optional — local only)
+
+The AI feature requires Ollama and a local Express server. It is **not available on the deployed Vercel version** because it depends on a locally running language model.
+
+To use it locally:
+
+```bash
+# Install Ollama from https://ollama.com, then pull the model
+ollama pull llama3.2:3b
+
+# In a separate terminal, start the backend server
+node server.cjs
+```
+
+Once both are running, the "Generate Vibe Description" button will work in the app.
+
+## Known Limitations
+
+- The song list is static and curated locally — not pulled from an external music API
+- The AI vibe feature is local-only and unavailable in the live deployment
+- Ratings can be changed but not cleared once set
+- Avatars are color-based rather than image uploads
