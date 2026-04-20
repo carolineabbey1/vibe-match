@@ -21,7 +21,7 @@ export default function SongCard({ song, isFavorite, onToggleFavorite, rating, o
           margin: 0,
           fontSize: "1rem",
           fontFamily: "'DM Sans', sans-serif",
-          color: "#f0eeff",
+          color: "var(--text)",
           whiteSpace: "nowrap",
           overflow: "hidden",
           textOverflow: "ellipsis",
@@ -32,7 +32,7 @@ export default function SongCard({ song, isFavorite, onToggleFavorite, rating, o
           margin: "0.2rem 0 0",
           fontSize: "0.85rem",
           fontFamily: "'DM Sans', sans-serif",
-          color: "rgba(240,238,255,0.45)",
+          color: "var(--muted)",
         }}>
           {song.artist}
         </p>

@@ -46,7 +46,7 @@ export default function Profile({ profile, onUpdate }) {
             borderRadius: "8px",
             border: "1px solid rgba(255,255,255,0.15)",
             background: "rgba(255,255,255,0.06)",
-            color: "#f0eeff",
+            color: "var(--text)",
             fontSize: "0.95rem",
             fontFamily: "'DM Sans', sans-serif",
             outline: "none",
@@ -131,7 +131,7 @@ export default function Profile({ profile, onUpdate }) {
       <span style={{
         fontSize: "0.95rem",
         fontFamily: "'DM Sans', sans-serif",
-        color: "#f0eeff",
+        color: "var(--text)",
       }}>
         {profile.display_name || "Anonymous"}
       </span>

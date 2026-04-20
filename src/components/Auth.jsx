@@ -56,7 +56,7 @@ export default function Auth() {
           fontFamily: "'DM Sans', sans-serif",
           lineHeight: 1.6,
         }}>
-          We sent a confirmation link to <strong style={{ color: "#f0eeff" }}>{email}</strong>. Click the link to activate your account, then come back here to log in.
+          We sent a confirmation link to <strong style={{ color: "var(--text)" }}>{email}</strong>. Click the link to activate your account, then come back here to log in.
         </p>
         <button
           onClick={() => { setCheckEmail(false); setIsLogin(true) }}
@@ -112,7 +112,7 @@ export default function Auth() {
             borderRadius: "10px",
             border: "1px solid rgba(255,255,255,0.15)",
             background: "rgba(255,255,255,0.06)",
-            color: "#f0eeff",
+            color: "var(--text)",
             fontSize: "0.95rem",
             fontFamily: "'DM Sans', sans-serif",
             outline: "none",
@@ -130,7 +130,7 @@ export default function Auth() {
             borderRadius: "10px",
             border: "1px solid rgba(255,255,255,0.15)",
             background: "rgba(255,255,255,0.06)",
-            color: "#f0eeff",
+            color: "var(--text)",
             fontSize: "0.95rem",
             fontFamily: "'DM Sans', sans-serif",
             outline: "none",

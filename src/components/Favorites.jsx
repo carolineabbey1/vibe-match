@@ -7,7 +7,7 @@ export default function Favorites({ favoriteIds, songs, onToggleFavorite, onClea
     return (
       <p style={{
         textAlign: "center",
-        color: "rgba(240,238,255,0.45)",
+        color: "var(--muted)",
         fontFamily: "'DM Sans', sans-serif",
         fontSize: "0.95rem",
       }}>
