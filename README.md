@@ -2,8 +2,8 @@
 
 A mood-based music recommendation web app built with React and Supabase.
 
-**Live Demo:** [your-vercel-url-here]
-**GitHub:** [https://github.com/your-username/vibe-match](https://github.com/your-username/vibe-match)
+**Live Demo:** [https://vibe-match-alpha.vercel.app/](https://vibe-match-alpha.vercel.app/)
+**GitHub:** [https://github.com/carolineabbey1/vibe-match](https://github.com/carolineabbey1/vibe-match)
 
 ---
 
